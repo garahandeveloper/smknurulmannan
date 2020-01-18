@@ -1,0 +1,25 @@
+
+<style>
+	#class-qrcode {
+		width:160px;
+		height:160px;
+		margin-top:15px;
+		margin-left:auto;
+		margin-right:auto;
+	}
+</style>
+<script>
+
+var qrcode = new QRCode(document.getElementById("class-qrcode"), {
+    width: 200,
+    height: 200,
+    colorDark : "#000000",
+    colorLight : "#ffffff",
+    correctLevel : QRCode.CorrectLevel.H
+});
+function qrcodeMake(dataQR){
+	qrcode.makeCode(dataQR);
+}
+qrcodeMake(localStorage.getItem("nisn"));
+</script>
+<div id="class-qrcode"></div>

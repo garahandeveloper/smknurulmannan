@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--Import Google Icon Font-->
+<link href="fonts/materialicon.css" rel="stylesheet">
+<!--Import materialize.css-->
+<link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection"/>
+<link type="text/css" rel="stylesheet" href="css/loader.css" media="screen,projection"/>
+<!--Let browser know website is optimized for mobile-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<script type="text/javascript" src="js/jquery-3.4.1.js"></script>
+<script type="text/javascript" src="js/model.js"></script>
+
+<style>
+	.btn-style-a {
+		width:100%;
+		margin:0px;
+	}
+</style>
+
+</head>
+<body>
+<div class="row class-form-login" style="width:100%;">
+	<div class="col s12">
+		<div class="card">
+			<div class="card-content white-text">
+				<span class="card-title" style="color:#000;">SMK NURUL MANNAN</span>
+				<form action="#" method="post" id="formlogin">
+					<div class="row">
+						<div class="input-field col s12">
+							<input id="nisn" name="nisn" type="text" class="validate">
+							<label for="nisn">NISN</label>
+						</div>
+					</div>
+					<div class="row">
+						<div class="input-field col s12">
+							<input id="nik" name="nik" type="text" class="validate">
+							<label for="nik">NIK</label>
+						</div>
+					</div>
+					<button class="btn waves-effect waves-light btn-style-a" type="submit" name="action">LOGIN</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row" style="width:100%;">
+	<div class="col s12">
+		<div class="card">
+			<div class="card-content white-text class-card-ip1">
+				<span class="card-title" style="color:#000;">Setting Ip Address</span>
+					<div class="row">
+						<div class="input-field col s12">
+							<input id="ip" name="ip" type="text" placeholder="192.168.0.199">
+							<label for="nisn">IP Address</label>
+						</div>
+					</div>
+					<button class="btn waves-effect waves-light btn-style-a btn-save-ip" type="submit" name="action">Simpan</button>
+			</div>
+			
+			<div class="card-content white-text class-card-ip2">
+				<span class="card-title" style="color:#000;"><div class="class-view-ip-address"></div></span>
+					<button class="btn waves-effect deep-orange accent-3 btn-style-a btn-reset-ip" type="submit" name="action">Reset IP Address</button>
+			</div>
+			
+		</div>
+	</div>
+</div>
+<!--JavaScript at end of body for optimized loading-->
+<script type="text/javascript" src="js/materialize.min.js"></script>
+<script type="text/javascript" src="js/actionlogin.js"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<script>
+	$(document).ready(function(){
+		singkronGuru();
+		selectGuru();
+	});
+	createDatabaseSqlite("smknurma", "1.0", "smknurma", "2 * 1024 * 2024");
+	var link ="http://"+localStorage.getItem("ip_address")+"/uasbnbk/";
+	function loadGuru(){
+		var myData = "";
+		$.ajax({
+			type : "POST",
+			url : link + "guru_api/load?act=load",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : "",
+			beforeSend: function() {
+				$(".class-loading-cube").show();
+			},
+			success : function(data){
+				for(var i=0; i < data.length; i++){
+					var arrayGuru2 = ["id_guru", "nama_guru", "username", "password"];
+					var valGuru = ["'"+data[i]["id_guru"]+"'", "'"+data[i]["nama_guru"]+"'", "'"+data[i]["username"]+"'", "'"+data[i]["password"]+"'"];
+					insertDataInTable("guru", arrayGuru2, valGuru);
+				}
+				<!-- console.log(data.length); -->
+				selectGuru();
+			}
+		}).done(function(){
+			$(".class-loading-cube").hide("5000");
+		});
+	}
+	function singkronGuru(){
+		$(".class-sinc-guru").click(function(){
+			loadGuru();
+			<!-- selectGuru(); -->
+		});
+	}
+	function selectGuru(){
+		var dataGuruView = "";
+		databaseVariable.transaction(function(tx){
+			tx.executeSql("SELECT * FROM guru ORDER BY nama_guru ASC", [], function(tx, result){
+				var rowsData = result.rows;
+				for(var i = 0; i < rowsData.length; i++){
+					if(rowsData[i]["password"] != 1){
+					dataGuruView += "<a class='collection-item' value='"+rowsData[i]["id_guru_primary"]+"'>"+rowsData[i]["nama_guru"]+"</a>";
+					} else{}
+				}
+				$(".class-guru").html(dataGuruView);
+			});
+		});
+	}
+</script>
+<button class='waves-effect waves-light btn class-sinc-guru' style="margin:5px 0px 5px 0px; width:100%;">Singkron Guru</button>
+<div class="collection">
+	<div class="class-guru"></div>
+</div>

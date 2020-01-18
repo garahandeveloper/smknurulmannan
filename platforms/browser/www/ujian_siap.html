@@ -1,0 +1,57 @@
+<script>
+	$(document).ready(function(){
+		cekSudahSingkron();
+	});
+	createDatabaseSqlite("smknurma", "1.0", "smknurma", "2 * 1024 * 2024");
+	function cekSudahSingkron(){
+		databaseVariable.transaction(function(tx){
+			var cekData = "";
+			tx.executeSql("SELECT * FROM ujian", [], function(tx, result){
+				var rowsDataCount = result.rows;
+				var valueData = "";
+				valueData += "<table class='striped'>";
+				valueData += "<thead>";
+					valueData += "<tr>";
+						valueData += "<th>No</th>";
+						valueData += "<th>Nama Ujian</th>";
+						valueData += "<th>Act</th>";
+					valueData += "</tr>";
+				valueData += "</thead>";
+
+				valueData += "<tbody>";
+				for(var i = 0; i < rowsDataCount.length; i++){
+					<!-- console.log(rowsDataCount[i]["id"]+rowsDataCount[i]["id_ujian"]); -->
+					if(rowsDataCount[i]["nama_ujian"] == 1){
+					}else {
+						valueData += "<tr>";
+						valueData += "<td>"+i+"</td>";
+						valueData += "<td>"+rowsDataCount[i]["nama_ujian"]+"</td>";
+						valueData += "<td><button class='waves-effect waves-light btn modal-trigger class-delete-shsg' value='"+rowsDataCount[i]["id"]+"' id='"+rowsDataCount[i]["id_ujian"]+"'>D</button></td>";
+						valueData += "</tr>";
+					}
+				}
+					valueData += "</tbody>";
+				valueData += "</table>";
+				$(".class-value-data-ujian").html(valueData);
+				deletesdhg();
+			});
+		});
+	}
+	function deletesdhg(){
+		$(".class-delete-shsg").click(function(){
+			if(confirm("data ujian di HP akan hilang...")){
+				var ujianId = $(this).attr("id");
+				var arrayParamSoal = ["ujian_id="+ujianId+""];
+				deleteDataInTable("bank_soal", arrayParamSoal);
+				
+				var idDelete = $(this).attr("value");
+				<!-- console.log(idDelete) -->
+				var arrayParamUjian = ["id="+idDelete+""];
+				deleteDataInTable("ujian", arrayParamUjian);
+				cekSudahSingkron();
+			}else {}
+		});
+	}
+</script>
+
+<div class="class-value-data-ujian"></div>

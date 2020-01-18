@@ -1,0 +1,212 @@
+<style>
+	.class-token-data{
+		width:100%;
+		margin:5px 0px 5px 0px;
+	}
+	.class-token-reset {
+		width:100%;
+		margin:5px 0px 5px 0px;
+	}
+	.collection-item  {
+		<!-- overflow:scroll; -->
+	}
+</style>
+<script>
+	$(document).ready(function(){
+		$('.modal').modal();
+		readNumber();
+		tokenValidate();
+		$(".class-data-soal-view").hide();
+		if(localStorage.getItem("token") == "" || localStorage.getItem("token") == null){
+			$(".class-click-number-a").hide();
+		} else {
+			$(".class-click-number-a").show();
+		}
+	});
+	createDatabaseSqlite("smknurma", "1.0", "smknurma", "2 * 1024 * 2024");
+	function readNumber(){
+		$(".class-click-number").click(function(){
+			var tokenStorage = localStorage.getItem("token");
+			databaseVariable.transaction(function(tx){
+				tx.executeSql("SELECT a.`id_bank_soal`,c.`jawaban`,CASE WHEN (c.`jawaban` IS NULL) THEN 1 ELSE 2 END AS status_jawaban, c.`jawaban` FROM bank_soal AS a JOIN ujian AS b ON a.`ujian_id` = b.`id_ujian` AND b.`token` = '"+tokenStorage+"' LEFT JOIN jawaban_siswa AS c ON a.`id_bank_soal` = c.`no_soal` AND c.`nisn` = '"+localStorage.getItem("nisn")+"' AND c.`nik` = '"+localStorage.getItem("nik")+"' GROUP BY a.`soal` ORDER BY a.`id_bank_soal` ASC", [], function(tx, result){
+					var data = result.rows;
+					var isiData ="";
+					if(data.length != 0){
+						for(var i = 0; i < data.length; i++){
+							var nomerSoal = i+1;
+							if(data[i]['status_jawaban'] == 1){
+								isiData += "<a href='#!' class='modal-close waves-effect btn-flat class-choise' style='border:1px solid #000; margin:1px;' value='"+data[i]['id_bank_soal']+"'>"+nomerSoal+"</a>";
+							}else {
+								isiData += "<a href='#!' class='modal-close waves-effect red lighten-3 waves-green btn-flat class-choise' style='border:1px solid #000; margin:1px;' value='"+data[i]['id_bank_soal']+"'>"+nomerSoal+" "+data[i]['jawaban']+"</a>";
+							}
+							$("#view-number").html(isiData);
+						}
+						choiseNumberSoal();
+					} else {
+						$("#view-number").html("");
+					}
+				});
+			});
+		});
+	}
+	
+	function choiseNumberSoal(){
+		$(".class-choise").click(function(){
+			var numberChoise = $(this).attr("value");
+			localStorage.setItem("nomer_soal_sudah_dipilih", numberChoise);
+			choiseNumberSoal2();
+		});
+	}
+	function choiseNumberSoal2(){
+			$(".class-data-soal-view").show();
+			databaseVariable.transaction(function(tx){
+				tx.executeSql("SELECT a.`id_bank_soal`, a.`soal`, a.`a`, a.`b`, a.`c`, a.`d`, a.`e`, b.*, c.`id_jawaban_siswa` IS NOT NULL AS status_soal, c.`jawaban` FROM bank_soal AS a JOIN ujian AS b ON a.`ujian_id` = b.`id_ujian` AND b.`token` = '"+localStorage.getItem("token")+"' LEFT JOIN jawaban_siswa AS c ON a.`id_bank_soal` = c.`no_soal` AND c.`nisn` = '"+localStorage.getItem("nisn")+"' AND c.`nik` = '"+localStorage.getItem("nik")+"' WHERE a.`id_bank_soal` = '"+localStorage.getItem("nomer_soal_sudah_dipilih")+"' GROUP BY a.`soal` LIMIT 1", [], function(tx, result){
+					var data = result.rows;
+					<!-- console.log(data[0]["status_soal"]); -->
+					
+					$("#soal").html(data[0]["soal"]);
+					if(data[0]["status_soal"] == 0){
+						$("#soal").html("<div href='#!' class='collection-item'><h6>"+data[0]["soal"]+"</h6></div>");
+						$("#a").html("<a href='#!' value='"+data[0]["id_bank_soal"]+"' id='a' class='collection-item class-jawaban-siswa'>"+data[0]["a"]+"</a>");
+						$("#b").html("<a href='#!' value='"+data[0]["id_bank_soal"]+"' id='b' class='collection-item class-jawaban-siswa'>"+data[0]["b"]+"</a>");
+						$("#c").html("<a href='#!' value='"+data[0]["id_bank_soal"]+"' id='c' class='collection-item class-jawaban-siswa'>"+data[0]["c"]+"</a>");
+						$("#d").html("<a href='#!' value='"+data[0]["id_bank_soal"]+"' id='d' class='collection-item class-jawaban-siswa'>"+data[0]["d"]+"</a>");
+						$("#e").html("<a href='#!' value='"+data[0]["id_bank_soal"]+"' id='e' class='collection-item class-jawaban-siswa'>"+data[0]["e"]+"</a>");
+					} else {
+						if(data[0]["jawaban"] == "a"){
+							var colorchoisea = "style='background-color:#ef9a9a;'";
+						} else if(data[0]["jawaban"] == "b"){
+							var colorchoiseb = "style='background-color:#ef9a9a;'";
+						} else if(data[0]["jawaban"] == "c"){
+							var colorchoisec = "style='background-color:#ef9a9a;'";
+						} else if(data[0]["jawaban"] == "d"){
+							var colorchoised = "style='background-color:#ef9a9a;'";
+						} else if(data[0]["jawaban"] == "e"){
+							var colorchoisee = "style='background-color:#ef9a9a;'";
+						} else {
+							var colorchoise = "";
+						}
+						console.log(data[0]["jawaban"]);
+						$("#soal").html("<div href='#!' class='collection-item'><h6>"+data[0]["soal"]+"</h6></div>");
+						$("#a").html("<a href='#!' "+colorchoise+" "+colorchoisea+" value='"+data[0]["id_bank_soal"]+"' id='a' class='collection-item class-jawaban-siswa'>"+data[0]["a"]+"</a>");
+						$("#b").html("<a href='#!' "+colorchoise+" "+colorchoiseb+" value='"+data[0]["id_bank_soal"]+"' id='b' class='collection-item class-jawaban-siswa'>"+data[0]["b"]+"</a>");
+						$("#c").html("<a href='#!' "+colorchoise+" "+colorchoisec+" value='"+data[0]["id_bank_soal"]+"' id='c' class='collection-item class-jawaban-siswa'>"+data[0]["c"]+"</a>");
+						$("#d").html("<a href='#!' "+colorchoise+" "+colorchoised+" value='"+data[0]["id_bank_soal"]+"' id='d' class='collection-item class-jawaban-siswa'>"+data[0]["d"]+"</a>");
+						$("#e").html("<a href='#!' "+colorchoise+" "+colorchoisee+" value='"+data[0]["id_bank_soal"]+"' id='e' class='collection-item class-jawaban-siswa'>"+data[0]["e"]+"</a>");
+
+					}
+					saveJawabanSiswa();
+				});
+			});
+	}
+	function saveJawabanSiswa(){
+		$(".class-jawaban-siswa").click(function(){
+			if(confirm("Simpan Jawaban")){
+				var idBankSoal = $(this).attr("value");
+				var choiseAbjad = $(this).attr("id");
+				<!-- console.log(idBankSoal + choiseAbjad); -->
+				
+				<!-- var whereCheck = ["nisn = '"+localStorage.getItem("nisn")+"'", "nik = '"+localStorage.getItem("nik")+"'", "token = '"+localStorage.getItem("token")+"'", "no_soal = '"+idBankSoal+"'"]; -->
+				databaseVariable.transaction(function(tx){
+					tx.executeSql("SELECT * FROM jawaban_siswa WHERE nisn = '"+localStorage.getItem("nisn")+"' AND nik = '"+localStorage.getItem("nik")+"' AND token = '"+localStorage.getItem("token")+"' AND no_soal = '"+idBankSoal+"'", [], function(tx, result){
+						var rowsDataCount = result.rows;
+						if(rowsDataCount.length > 0){
+							// ini aneh
+							// saat menggunakan sqlite query delete malah delete dan insert 
+							// keterangan jadi jika ada data maka pertama akan men delete , setelah
+							// itu insert jadi kayak fungsi update jadi nya
+							var vrNisn= localStorage.getItem("nisn");
+							var vrNik= localStorage.getItem("nik");
+							var vrToken= localStorage.getItem("token");
+							var vrNoSoal= rowsDataCount[0]["no_soal"];
+							var vrIdNoSoal= rowsDataCount[0]["id_jawaban_siswa"];
+							var vrJawaban = choiseAbjad;
+							<!-- tx.executeSql("UPDATE jawaban_siswa AS a SET jawaban = ? WHERE id_jawaban_siswa =? AND nisn = ? AND nik =? AND token =? AND no_soal =?", [vrJawaban, vrIdNoSoal,vrNisn, vrNik, vrToken, vrNoSoal]); -->
+							tx.executeSql("DELETE FROM jawaban_siswa WHERE id_jawaban_siswa =? AND nisn = ? AND nik =? AND token =? AND no_soal =?", [vrIdNoSoal,vrNisn, vrNik, vrToken, vrNoSoal]);
+							<!-- console.log("UPDATE jawaban_siswa AS a SET jawaban = ? WHERE id_jawaban_siswa =? AND nisn = ? AND nik =? AND token =? AND no_soal =?", [vrJawaban, vrIdNoSoal,vrNisn, vrNik, vrToken, vrNoSoal]); -->
+						} else {}
+						if(rowsDataCount.length == 0) {
+							
+							<!-- var arrayFildJawaban = ["nisn", "nik", "token", "no_soal", "jawaban"]; -->
+							<!-- var val3 = ["'"+localStorage.getItem("nisn")+"'", "'"+localStorage.getItem("nik")+"'", "'"+localStorage.getItem("token")+"'", "'"+idBankSoal+"'", "'"+choiseAbjad+"'"]; -->
+							<!-- insertDataInTable("jawaban_siswa", arrayFildJawaban, val3); -->
+							console.log("kosong");
+						} else {}
+						choiseNumberSoal2();
+					});
+				});
+				
+				var arrayFildJawaban = ["nisn", "nik", "token", "no_soal", "jawaban"];
+				var val3 = ["'"+localStorage.getItem("nisn")+"'", "'"+localStorage.getItem("nik")+"'", "'"+localStorage.getItem("token")+"'", "'"+idBankSoal+"'", "'"+choiseAbjad+"'"];
+				insertDataInTable("jawaban_siswa", arrayFildJawaban, val3);
+			} else {}
+		});
+	}
+	function tokenValidate(){
+		if(localStorage.getItem("token") == "" || localStorage.getItem("token") == null){
+			showa();
+		} else {
+			showb();
+		}
+		$(".class-token-data").click(function(){
+			localStorage.setItem("token", $("#token").val());
+			showb();
+			$("#token").val("");
+		});
+		$(".class-token-reset").click(function(){
+			localStorage.removeItem("token");
+			$(".class-click-number-a").hide();
+			$(".class-data-soal-view").hide();
+			showa();
+		});
+	}
+	function showa(){
+		$(".token").show();
+		$(".class-token-data").show();
+		$(".class-token-reset").hide();
+		$(".class-click-number-a").hide();
+	}
+	function showb(){
+		$(".token").hide();
+		$(".class-token-data").hide();
+		$(".class-token-reset").show();
+		$(".class-click-number-a").show();
+	}
+</script>
+<div class="fixed-action-btn class-click-number-a">
+	<a class="btn-floating btn-large red">
+		<i class="large material-icons modal-trigger class-click-number" href="#modal1">border_color</i>
+	</a>
+</div>
+<div class="input-field col s6">
+	<input id="token" class="token" type="text">
+	<label for="last_name" class="token">TOKEN</label>
+</div>
+<a class="waves-effect waves-light btn class-token-data">Input TOKEN</a>
+<a class="waves-effect  red darken-4 btn class-token-reset">Reset TOKEN</a>
+
+<div class="row class-data-soal-view" style="width:100%;">
+	<div class="col s12">
+		<div class="card">
+			<div class="collection">
+				<div id="soal"></div>
+				<div id="a"></div>
+				<div id="b"></div>
+				<div id="c"></div>
+				<div id="d"></div>
+				<div id="e"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal Structure -->
+<div id="modal1" class="modal">
+	<div class="modal-content">
+		<h4>Pilih Nomer</h4>
+		<div id="view-number"></div>
+	</div>
+	<div class="modal-footer">
+		<a href="#!" class="modal-close waves-effect waves-green btn-flat">Tutup</a>
+	</div>
+</div>

@@ -1,0 +1,124 @@
+<style>
+	.class-modal-button {
+		margin:10px 0px 10px 0px;
+		width:100%;
+	}
+</style>
+<script>
+$(document).ready(function(){
+	$('.modal').modal();
+	$(".class-modal-button").on("click", function(){
+		loadMateri();
+	});
+});
+createDatabaseSqlite("smknurma", "1.0", "smknurma", "2 * 1024 * 2024");
+var link ="http://"+localStorage.getItem("ip_address")+"/uasbnbk/";
+function loadMateri(){
+	var myData = "";
+	$.ajax({
+		type : "POST",
+		url : link + "materi_api/load?act=load",
+		contentType: "application/x-www-form-urlencoded; charset=utf-8",
+		dataType    : "json",
+		data : "",
+		beforeSend: function() {
+			$(".class-loading-cube").show();
+		},
+		success : function(data){
+			
+			for(var i=0; i < data.length; i++){
+				myData += "<a href='#' value ="+data[i]["id_materi"]+" class='modal-close collection-item class-choise-item'>"+data[i]["nama_materi"]+"</a>";
+			}
+			$(".class-ujian").html(myData);
+			clickagain();
+		}
+	}).done(function(){
+		$(".class-loading-cube").hide("5000");
+	});
+}
+function clickagain(){
+	$(".class-choise-item").on("click", function(){
+		var valItem = "";
+		var vall = $(this).attr("value");
+		$.ajax({
+			type : "POST",
+			url : link + "ujian_api/load?act=load&materiId="+vall+"&kelasId="+localStorage.getItem("kelas_id"),
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : "",
+			beforeSend: function() {
+				$(".class-loading-cube").show();
+			},
+			success : function(data){
+				for(var i=0; i < data.length; i++){
+					valItem += "<a href='#!' value='"+data[i]["id_ujian"]+"' class='collection-item class-click-sinc-ujian'>"+data[i]["nama_ujian"]+"</a>";
+				}
+				$(".class-data-ujian-view").html(valItem);
+				clickSinc();
+			}
+		}).done(function(){
+			$(".class-loading-cube").hide("5000");
+		});
+	});
+}
+function clickSinc(){
+	$(".class-click-sinc-ujian").click(function(){
+		if(confirm("Yakin Ingin Menyingkronkan")){
+			var id_ujian = $(this).attr("value");
+			$.ajax({
+			type : "POST",
+			url : link + "bank_soal_api/load?act=load&idUjian="+id_ujian,
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : "",
+			beforeSend: function() {
+				$(".class-loading-cube").show();
+			},
+			success : function(data){
+				for(var i=0; i < data.length; i++){
+					if(data[i]["id_ujian"] == null || data[i]["id_ujian"] == "" || data[i]["id_ujian"] == "undefined"){
+						var arraSoal2 = ["soal", "a", "b", "c", "d", "e", "ujian_id", "jawaban_soal"];
+						var val2 = ["'"+data[i]["soal"]+"'", "'"+data[i]["a"]+"'", "'"+data[i]["b"]+"'", "'"+data[i]["c"]+"'", "'"+data[i]["d"]+"'", "'"+data[i]["e"]+"'", "'"+data[i]["ujian_id"]+"'", "'"+data[i]["jawaban_soal"]+"'"];
+						insertDataInTable("bank_soal", arraSoal2, val2);
+					} else{
+						var arrayfild = ["id_ujian","nama_ujian", "kelas_id", "token", "guru_id", "materi_id", "jumlah_ujian", "persen_multiple_coice", "persen_essay", "waktu", "metode", "jenis_ujian"];
+						var val = ["'"+data[i]["id_ujian"]+"'", "'"+data[i]["nama_ujian"]+"'", "'"+data[i]["kelas_id"]
+						+"'", "'"+data[i]["token"]+"'", "'"+data[i]["guru_id"]+"'", "'"+data[i]["materi_id"]+"'", "'"+data[i]["materi_id"]
+						+"'", "'"+data[i]["jumlah_ujian"]+"'", "'"+data[i]["persen_multiple_coice"]+"'", "'"+data[i]["persen_essay"]
+						+"'", "'"+data[i]["waktu"]+"'", "'"+data[i]["jenis_ujian"]+"'"];
+						insertDataInTable("ujian", arrayfild, val);
+					}
+				}
+			}
+		}).done(function(){
+			$(".class-loading-cube").hide("5000");
+		});
+		}else{}
+	});
+}
+</script>
+<style>
+	.modal {
+		z-index:2;
+	}
+</style>
+			
+	
+  <!-- Modal Trigger -->
+	<a class="waves-effect waves-light btn modal-trigger class-modal-button" href="#modal1">Pilih Materi</a>
+
+	<!-- Modal Structure -->
+	<div id="modal1" class="modal">
+		<div class="modal-content">
+			<h4>Pilih Materi</h4>
+			<div class="collection">
+				<div class="class-ujian"></div>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<a href="#!" class="modal-close waves-effect waves-green btn-flat">Tutup</a>
+		</div>
+	</div>
+	<div class="collection">
+		<div class="class-data-ujian-view"></div>
+	</div>

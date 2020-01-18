@@ -1,0 +1,58 @@
+<script>
+	$(document).ready(function(){
+		singkronDataAbsen();
+		selectDataAbsen();
+	});
+	createDatabaseSqlite("smknurma", "1.0", "smknurma", "2 * 1024 * 2024");
+	var link ="http://"+localStorage.getItem("ip_address")+"/uasbnbk/";
+	function loadInsertDataAbsen(){
+		var myData = "";
+		$.ajax({
+			type : "POST",
+			url : link + "absen_struktur_api/load?act=load",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : "",
+			beforeSend: function() {
+				$(".class-loading-cube").show();
+			},
+			success : function(data){
+				for(var i=0; i < data.length; i++){
+					var arrayAbsenStruktur = ["id_absen_struktur", "nama_absen_struktur", "nilai_absen_struktur", "jam_absen_struktur", "kode_absen_struktur"];
+					<!-- console.log("id_absen_struktur", "nama_absen_struktur", "nilai_absen_struktur", "jam_absen_struktur", "kode_absen_struktur"); -->
+					var valAbsenStruktur = ["'"+data[i]["id_absen_struktur"]+"'", "'"+data[i]["nama_absen_struktur"]+"'", "'"+data[i]["nilai_absen_struktur"]+"'", "'"+data[i]["jam_absen_struktur"]+"'","'"+data[i]["kode_absen_struktur"]+"'"];
+					<!-- console.log("'"+data[i]["id_absen_struktur"]+"'", "'"+data[i]["nama_absen_struktur"]+"'", "'"+data[i]["nilai_absen_struktur"]+"'", "'"+data[i]["jam_absen_struktur"]+"'","'"+data[i]["kode_absen_struktur"]+"'"); -->
+					insertDataInTable("absen_struktur", arrayAbsenStruktur, valAbsenStruktur);
+				}
+				<!-- console.log(data.length); -->
+				selectDataAbsen();
+			}
+		}).done(function(){
+			$(".class-loading-cube").hide("5000");
+		});
+	}
+	function singkronDataAbsen(){
+		$(".class-sinc-data-absen").click(function(){
+			loadInsertDataAbsen();
+			<!-- selectGuru(); -->
+		});
+	}
+	function selectDataAbsen(){
+		var dataAbsenView = "";
+		databaseVariable.transaction(function(tx){
+			tx.executeSql("SELECT * FROM absen_struktur ORDER BY nama_absen_struktur ASC", [], function(tx, result){
+				var rowsData = result.rows;
+				for(var i = 0; i < rowsData.length; i++){
+					if(rowsData[i]["nama_absen_struktur"] != 1){
+						dataAbsenView += "<a class='collection-item' value='"+rowsData[i]["id_absen_struktur"]+"'>"+rowsData[i]["nama_absen_struktur"]+"</a>";
+					} else{}
+				}
+				$(".class-data-absen").html(dataAbsenView);
+			});
+		});
+	}
+</script>
+<button class='waves-effect waves-light btn class-sinc-data-absen' style="margin:5px 0px 5px 0px; width:100%;">Singkron Data Absen</button>
+<div class="collection">
+	<div class="class-data-absen"></div>
+</div>

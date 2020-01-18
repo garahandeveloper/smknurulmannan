@@ -1,0 +1,146 @@
+<style>
+	.class-modal-data {
+		width:100%;
+	}
+	.btn-ip-class {width:100%;}
+</style>
+<script>
+	$(document).ready(function(){
+		$(".class-modal-data").click(function(){
+			create_database_table();
+		});
+		rowsData();
+		btnIpServer();
+	});
+	//create database
+	createDatabaseSqlite("smknurma", "1.0", "smknurma", "2 * 1024 * 2024");
+	function create_database_table(){
+		
+		// create table
+		// ini menambahkan id di database sqlite
+		//untuk database mysql id menggunakan id_ujian
+		// id_ujian(integer) pada sqlite nantinya akan menampung data dari mysql id_ujian
+		var arrayUjian = ["id INTEGER PRIMARY KEY AUTOINCREMENT", "id_ujian INTEGER", "nama_ujian VARCHAR", "kelas_id INTEGER", "token VARCHAR", "guru_id INTEGER", "materi_id INTEGER", "jumlah_ujian INTEGER", "persen_multiple_coice INTEGER", "persen_essay INTEGER", "waktu VARCHAR", "metode INTEGER", "jenis_ujian INTEGER"];
+		createTableSqlite("ujian", arrayUjian);
+		var arrayfild = ["id_ujian","nama_ujian", "kelas_id", "token", "guru_id", "materi_id", "jumlah_ujian", "persen_multiple_coice", "persen_essay", "waktu", "metode", "jenis_ujian"];
+		var val = ["1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1"];
+		insertDataInTable("ujian", arrayfild, val);
+		
+		//
+		var arraSoal = ["id_bank_soal INTEGER PRIMARY KEY AUTOINCREMENT", "soal TEXT", "a TEXT", "b TEXT", "c TEXT", "d TEXT", "e TEXT", "ujian_id INTEGER", "jawaban_soal VARCHAR"];
+		createTableSqlite("bank_soal", arraSoal);
+		
+		var arraSoal2 = ["soal", "a", "b", "c", "d", "e", "ujian_id", "jawaban_soal"];
+		var val2 = ["1", "1", "1", "1", "1", "1", "1", "1"];
+		insertDataInTable("bank_soal", arraSoal2, val2);
+		//
+		var arrayJawaban = ["id_jawaban_siswa INTEGER PRIMARY KEY AUTOINCREMENT", "nisn TEXT", "nik TEXT", "token TEXT", "no_soal INTEGER", "jawaban TEXT"];
+		createTableSqlite("jawaban_siswa", arrayJawaban);
+		var arrayFildJawaban = ["id_jawaban_siswa", "nisn", "nik", "token", "no_soal", "jawaban"];
+		var val3 = ["1", "1", "1", "1", "1", "1"];
+		insertDataInTable("jawaban_siswa", arrayFildJawaban, val3);
+		
+		//
+		var arrayGuru = ["id_guru_primary INTEGER PRIMARY KEY AUTOINCREMENT", "id_guru INTEGER UNIQUE NOT NULL ON CONFLICT REPLACE", "nama_guru TEXT", "username TEXT", "password TEXT"];
+		createTableSqlite("guru", arrayGuru);
+		//id_guru digunakan untuk insert data dari server ke sqlite biar cocok antara server dan sqlite
+		// untuk id_guru_primary sebagai auto increment
+		var arrayGuru2 = ["id_guru", "nama_guru", "username", "password"];
+		var valGuru = ["1", "1", "1", "1"];
+		insertDataInTable("guru", arrayGuru2, valGuru);
+		rowsData();
+	}
+	function rowsData(){
+		databaseVariable.transaction(function(tx){
+			var cekData = "";
+			tx.executeSql("SELECT * FROM ujian", [], function(tx, result){
+				var rowsDataCount = result.rows;
+				if(rowsDataCount.length > 0){
+					$(".class-modal-data").hide();
+					$(".class-rows").html("<a href='#!' class='collection-item class-click-sinc-ujian'>Data Ujian Sudah Siap</a>");
+				} else {
+					$(".class-rows").html("<a href='#!' class='collection-item class-click-sinc-ujian'>Data Ujian Belum Siap</a>");				
+				}
+			});
+			//
+			tx.executeSql("SELECT * FROM bank_soal", [], function(tx, result){
+				var rowsDataCount = result.rows;
+				if(rowsDataCount.length > 0){
+					$(".class-modal-data").hide();
+					$(".class-rows2").html("<a href='#!' class='collection-item class-click-sinc-ujian'>Data Bang Soal Sudah Siap</a>");
+				} else {
+					$(".class-rows2").html("<a href='#!' class='collection-item class-click-sinc-ujian'>Data Bang Soal Belum Siap</a>");				
+				}
+			});
+			tx.executeSql("SELECT * FROM jawaban_siswa", [], function(tx, result){
+				var rowsDataCount = result.rows;
+				if(rowsDataCount.length > 0){
+					$(".class-modal-data").hide();
+					$(".class-rows3").html("<a href='#!' class='collection-item class-click-sinc-ujian'>Data Jawaban Siswa Sudah Siap</a>");
+				} else {
+					$(".class-rows3").html("<a href='#!' class='collection-item class-click-sinc-ujian'>Data Jawaban Siswa Belum Siap</a>");				
+				}
+			});
+			
+			tx.executeSql("SELECT * FROM guru", [], function(tx, result){
+				var rowsDataCount = result.rows;
+				if(rowsDataCount.length > 0){
+					$(".class-modal-data").hide();
+					$(".class-rows4").html("<a href='#!' class='collection-item class-click-sinc-ujian'>Data Guru Sudah Siap</a>");
+				} else {
+					$(".class-rows4").html("<a href='#!' class='collection-item class-click-sinc-ujian'>Data Guru Belum Siap</a>");				
+				}
+			});
+		});
+	}
+	function btnIpServer(){
+		if(localStorage.getItem("ipserver") == "" || localStorage.getItem("ipserver") == null){
+			sh11();
+			$(".class-btn-simpan-ipserver").click(function(){
+				var ip = $("#ipserver").val();
+				localStorage.setItem("ipserver", ip);
+				$("#view-ipserver").html(ip);
+				sh22();		
+			});
+		} else {
+			
+			sh22();
+			$("#view-ipserver").html(localStorage.getItem("ipserver"));
+			$(".class-btn-reset-ipserver").click(function(){
+				localStorage.removeItem("ipserver");
+				sh11();
+			});
+		}
+	}
+	function sh11(){
+		$(".class-btn-reset-ipserver").hide();
+		$(".class-view-ipserver").hide();
+		$(".class-btn-simpan-ipserver").show();
+		$(".form-ip").show();
+	}
+	function sh22(){
+		$(".class-btn-reset-ipserver").show();
+		$(".class-view-ipserver").show();
+		$(".class-btn-simpan-ipserver").hide();
+		$(".form-ip").hide();
+	}
+</script>
+<div class="collection">
+	<h6>Kesiapan Data</h6>
+	<div class="class-rows"></div>
+	<div class="class-rows2"></div>
+	<div class="class-rows3"></div>
+	<div class="class-rows4"></div>
+	<a class="waves-effect waves-light btn class-modal-data" href="#!">Siapkan Data</a>
+</div>
+
+<div class="collection">
+	<h6>Alamat Ip SERVER yang akan di tuju</h6>
+	<div class="input-field col s6 form-ip">
+		<input id="ipserver" class="token" type="text">
+		<label for="last_name" class="token">IP SERVER</label>
+	</div>
+	<div class="collection class-view-ipserver" style="padding:10px;"><div id="view-ipserver"></div></div>
+	<a class="waves-effect waves-light btn btn-ip-class class-btn-simpan-ipserver" href="#!">Simpan IP SERVER</a>
+	<a class="waves-effect red darken-4 btn btn-ip-class class-btn-reset-ipserver" href="#!">Reset IP SERVER</a>
+</div>
